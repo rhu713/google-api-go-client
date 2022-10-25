@@ -9829,6 +9829,7 @@ func (c *ObjectsInsertCall) doRequest(alt string) (*http.Response, error) {
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.object)
 	if err != nil {
+		c.logf("rh_debug: WithoutDataWrapper.JSONReader(c.object) err: %v", err)
 		return nil, err
 	}
 	reqHeaders.Set("Content-Type", "application/json")
@@ -9848,6 +9849,7 @@ func (c *ObjectsInsertCall) doRequest(alt string) (*http.Response, error) {
 	urls += "?" + c.urlParams_.Encode()
 	req, err := http.NewRequest("POST", urls, body)
 	if err != nil {
+		c.logf("rh_debug: http.NewRequest(\"POST\", urls, body) err :%v" ,err)
 		return nil, err
 	}
 	req.Header = reqHeaders
@@ -9856,9 +9858,17 @@ func (c *ObjectsInsertCall) doRequest(alt string) (*http.Response, error) {
 		"bucket": c.bucket,
 	})
 	if c.retry != nil {
-		return gensupport.SendRequestWithRetry(c.ctx_, c.s.client, req, c.retry)
+		res, err:=  gensupport.SendRequestWithRetry(c.ctx_, c.s.client, req, c.retry)
+		if err != nil {
+			c.logf("rh_debug: gensupport.SendRequestWithRetry() err: %v", err)
+		}
+		return res, err
 	}
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	res, err := gensupport.SendRequest(c.ctx_, c.s.client, req)
+	if err != nil {
+		c.logf("rh_debug: gensupport.SendRequest() err: %v", err)
+	}
+	return res, err
 }
 
 // Do executes the "storage.objects.insert" call.
@@ -9871,7 +9881,6 @@ func (c *ObjectsInsertCall) doRequest(alt string) (*http.Response, error) {
 func (c *ObjectsInsertCall) Do(opts ...googleapi.CallOption) (*Object, error) {
 	gensupport.SetOptions(c.urlParams_, opts...)
 	res, err := c.doRequest("json")
-	c.logf("rh_debug: calling ObjectsInsertCall.Do()!")
 	if res != nil && res.StatusCode == http.StatusNotModified {
 		if res.Body != nil {
 			res.Body.Close()
@@ -9882,10 +9891,12 @@ func (c *ObjectsInsertCall) Do(opts ...googleapi.CallOption) (*Object, error) {
 		}
 	}
 	if err != nil {
+		c.logf("rh_debug: doRequest err: %v", err)
 		return nil, err
 	}
 	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
+		c.logf("rh_debug: checkResponse err: %v", err)
 		return nil, err
 	}
 	rx := c.mediaInfo_.ResumableUpload(res.Header.Get("Location"))
@@ -9899,10 +9910,12 @@ func (c *ObjectsInsertCall) Do(opts ...googleapi.CallOption) (*Object, error) {
 		}
 		res, err = rx.Upload(ctx)
 		if err != nil {
+			c.logf("rh_debug: rx.Upload err: %v", err)
 			return nil, err
 		}
 		defer res.Body.Close()
 		if err := googleapi.CheckResponse(res); err != nil {
+			c.logf("rh_debug: rx.Upload checkResponse err: %v", err)
 			return nil, err
 		}
 	}
@@ -9914,6 +9927,7 @@ func (c *ObjectsInsertCall) Do(opts ...googleapi.CallOption) (*Object, error) {
 	}
 	target := &ret
 	if err := gensupport.DecodeResponse(target, res); err != nil {
+		c.logf("rh_debug: DecodeResponse err: %v", err)
 		return nil, err
 	}
 	return ret, nil

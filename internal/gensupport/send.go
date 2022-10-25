@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -94,6 +95,12 @@ func sendAndRetry(ctx context.Context, client *http.Client, req *http.Request, r
 			// the context's error is probably more useful.
 			if err == nil {
 				err = ctx.Err()
+				if err != nil {
+					fmt.Println("rh_debug: nil err ctx err: ", err)
+				}
+			}
+			if err != nil {
+				fmt.Println("rh_debug: not nil err: ", err)
 			}
 			return resp, err
 		case <-time.After(pause):
@@ -105,12 +112,18 @@ func sendAndRetry(ctx context.Context, client *http.Client, req *http.Request, r
 			// That can cause an operation to go through even if the context was
 			// canceled before.
 			if err == nil {
+				fmt.Println("rh_debug: nil err 2 ctx err: ", err)
 				err = ctx.Err()
+			} else {
+				fmt.Println("rh_debug: not nil err 2: ", err)
 			}
 			return resp, err
 		}
 
 		resp, err = client.Do(req.WithContext(ctx))
+		if err != nil {
+			fmt.Println("rh_debug: client.Do() err: ", err)
+		}
 
 		var status int
 		if resp != nil {
@@ -121,11 +134,15 @@ func sendAndRetry(ctx context.Context, client *http.Client, req *http.Request, r
 		// is retryable and the request body can be re-created using GetBody (this
 		// will not be possible if the body was unbuffered).
 		if req.GetBody == nil || !errorFunc(status, err) {
+			if err != nil {
+				fmt.Println("rh_debug: not retrying err: ", err)
+			}
 			break
 		}
 		var errBody error
 		req.Body, errBody = req.GetBody()
 		if errBody != nil {
+			fmt.Println("rh_debug: has errBody: ", errBody)
 			break
 		}
 
@@ -133,6 +150,7 @@ func sendAndRetry(ctx context.Context, client *http.Client, req *http.Request, r
 		if resp != nil && resp.Body != nil {
 			resp.Body.Close()
 		}
+		fmt.Println("rh_debug: retrying err: ", err)
 	}
 	return resp, err
 }

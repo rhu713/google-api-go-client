@@ -9597,6 +9597,7 @@ type ObjectsInsertCall struct {
 	retry      *gensupport.RetryConfig
 	ctx_       context.Context
 	header_    http.Header
+	logf			 func(format string, args ...interface{})
 }
 
 // Insert: Stores a new object and metadata.
@@ -9605,6 +9606,16 @@ type ObjectsInsertCall struct {
 //   Overrides the provided object metadata's bucket value, if any.
 func (r *ObjectsService) Insert(bucket string, object *Object) *ObjectsInsertCall {
 	c := &ObjectsInsertCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.logf = func(format string, args ...interface{}) {
+
+	}
+	c.bucket = bucket
+	c.object = object
+	return c
+}
+
+func (r *ObjectsService) InsertWithLogger(bucket string, object *Object, logf func(format string, args ...interface{})) *ObjectsInsertCall {
+	c := &ObjectsInsertCall{s: r.s, urlParams_: make(gensupport.URLParams), logf: logf}
 	c.bucket = bucket
 	c.object = object
 	return c
@@ -9810,7 +9821,6 @@ func (c *ObjectsInsertCall) Header() http.Header {
 
 func (c *ObjectsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
-	fmt.Println("rh_debug: Doing request ObjectsInsertCall")
 	reqHeaders.Set("x-goog-api-client", "gl-go/"+gensupport.GoVersion()+" gdcl/"+internal.Version)
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
@@ -9861,6 +9871,7 @@ func (c *ObjectsInsertCall) doRequest(alt string) (*http.Response, error) {
 func (c *ObjectsInsertCall) Do(opts ...googleapi.CallOption) (*Object, error) {
 	gensupport.SetOptions(c.urlParams_, opts...)
 	res, err := c.doRequest("json")
+	c.logf("rh_debug: calling ObjectsInsertCall.Do()!")
 	if res != nil && res.StatusCode == http.StatusNotModified {
 		if res.Body != nil {
 			res.Body.Close()

@@ -6,6 +6,7 @@ package gensupport
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"strings"
@@ -114,6 +115,7 @@ func (r *RetryConfig) errorFunc() func(status int, err error) bool {
 	}
 	return func(status int, err error) bool {
 		if status >= 400 {
+			fmt.Println("rh_debug: errorFunc retrying on response status", status, "err", err)
 			return r.ShouldRetry(&googleapi.Error{Code: status})
 		}
 		return r.ShouldRetry(err)

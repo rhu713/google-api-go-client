@@ -9858,7 +9858,7 @@ func (c *ObjectsInsertCall) doRequest(alt string) (*http.Response, error) {
 		"bucket": c.bucket,
 	})
 	if c.retry != nil {
-		res, err:=  gensupport.SendRequestWithRetry(c.ctx_, c.s.client, req, c.retry)
+		res, err:=  gensupport.SendRequestWithRetry(c.ctx_, c.s.client, req, c.retry, c.logf)
 		if err != nil {
 			c.logf("rh_debug: gensupport.SendRequestWithRetry() err: %v", err)
 		}

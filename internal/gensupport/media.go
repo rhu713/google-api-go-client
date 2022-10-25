@@ -360,6 +360,25 @@ func (mi *MediaInfo) ResumableUpload(locURI string) *ResumableUpload {
 			}
 		},
 		ChunkRetryDeadline: mi.chunkRetryDeadline,
+		logf:               func(format string, args ...interface{}) {},
+	}
+}
+
+func (mi *MediaInfo) ResumableUploadWithLogger(locURI string, logf func(format string, args ...interface{})) *ResumableUpload {
+	if mi == nil || mi.singleChunk {
+		return nil
+	}
+	return &ResumableUpload{
+		URI:       locURI,
+		Media:     mi.buffer,
+		MediaType: mi.mType,
+		Callback: func(curr int64) {
+			if mi.progressUpdater != nil {
+				mi.progressUpdater(curr, mi.size)
+			}
+		},
+		ChunkRetryDeadline: mi.chunkRetryDeadline,
+		logf:               logf,
 	}
 }
 

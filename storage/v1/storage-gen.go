@@ -9899,7 +9899,7 @@ func (c *ObjectsInsertCall) Do(opts ...googleapi.CallOption) (*Object, error) {
 		c.logf("rh_debug: checkResponse err: %v", err)
 		return nil, err
 	}
-	rx := c.mediaInfo_.ResumableUpload(res.Header.Get("Location"))
+	rx := c.mediaInfo_.ResumableUploadWithLogger(res.Header.Get("Location"), c.logf)
 	if rx != nil {
 		rx.Client = c.s.client
 		rx.UserAgent = c.s.userAgent()

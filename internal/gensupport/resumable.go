@@ -38,6 +38,8 @@ type ResumableUpload struct {
 	// ChunkRetryDeadline configures the per-chunk deadline after which no further
 	// retries should happen.
 	ChunkRetryDeadline time.Duration
+
+	logf func(format string, args ...interface{})
 }
 
 // Progress returns the number of bytes uploaded at this point.
@@ -189,9 +191,11 @@ func (rx *ResumableUpload) Upload(ctx context.Context) (resp *http.Response, err
 				if err == nil {
 					err = ctx.Err()
 				}
+				rx.logf("rh_debug: ResumableUpload ctx.Done() err:", err)
 				return prepareReturn(resp, err)
 			case <-time.After(pause):
 			case <-quitAfter:
+				rx.logf("rh_debug: ResumableUpload quitting retryDeadline:%v err:", retryDeadline, err)
 				return prepareReturn(resp, err)
 			}
 
@@ -205,8 +209,10 @@ func (rx *ResumableUpload) Upload(ctx context.Context) (resp *http.Response, err
 				if err == nil {
 					err = ctx.Err()
 				}
+				rx.logf("rh_debug: ResumableUpload ctx.Done() 2 err:", err)
 				return prepareReturn(resp, err)
 			case <-quitAfter:
+				rx.logf("rh_debug: ResumableUpload quitting 2 retryDeadline:%v err:", retryDeadline, err)
 				return prepareReturn(resp, err)
 			default:
 			}
@@ -220,7 +226,10 @@ func (rx *ResumableUpload) Upload(ctx context.Context) (resp *http.Response, err
 
 			// Check if we should retry the request.
 			if !errorFunc(status, err) {
+				rx.logf("rh_debug: ResumableUpload NOT retrying on errorFunc: err: %v", err)
 				break
+			} else {
+				rx.logf("rh_debug: ResumableUpload retrying on errorFunc: err: %v", err)
 			}
 
 			pause = bo.Pause()

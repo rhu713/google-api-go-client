@@ -9845,6 +9845,7 @@ func (c *ObjectsInsertCall) doRequest(alt string) (*http.Response, error) {
 		reqHeaders.Set("Content-Type", "application/json")
 	}
 	body, getBody, cleanup := c.mediaInfo_.UploadRequest(reqHeaders, body)
+	c.logf("rh_debug: media Upload request for %s, getbody nil %v", c.object.Name, getBody == nil)
 	defer cleanup()
 	urls += "?" + c.urlParams_.Encode()
 	req, err := http.NewRequest("POST", urls, body)

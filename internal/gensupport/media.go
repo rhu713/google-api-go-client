@@ -283,15 +283,20 @@ func (mi *MediaInfo) UploadRequest(reqHeaders http.Header, body io.Reader) (newB
 		// This only happens when the caller has turned off chunking. In that
 		// case, we write all of media in a single non-retryable request.
 		media = mi.media
+		fmt.Println("rh_debug: no chunking media")
 	} else if mi.singleChunk {
 		// The data fits in a single chunk, which has now been read into the MediaBuffer.
 		// We obtain that chunk so we can write it in a single request. The request can
 		// be retried because the data is stored in the MediaBuffer.
 		media, _, _, _ = mi.buffer.Chunk()
+		fmt.Println("rh_debug: single chunk media")
+	} else {
+		fmt.Println("rh_debug: multi-chunk media")
 	}
 	if media != nil {
 		fb := readerFunc(body)
 		fm := readerFunc(media)
+		fmt.Printf("fb=%T fm=%T body=%T media=%T", fb, fm, body, media)
 		combined, ctype := CombineBodyMedia(body, "application/json", media, mi.mType)
 		toCleanup := []io.Closer{
 			combined,
